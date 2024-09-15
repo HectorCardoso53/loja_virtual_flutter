@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "951545820892",
+    "project_id": "loja-99e0e",
+    "storage_bucket": "loja-99e0e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:951545820892:android:6e326602e24f8a3b1ae619",
+        "android_client_info": {
+          "package_name": "com.hectorcardoso.loja_virtual"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD2fBmRUBuNyePTSZeNQkwpAypIyGg4PX8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
