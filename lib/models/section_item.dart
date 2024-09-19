@@ -9,6 +9,13 @@ class SectionItem {
     );
   }
 
+  Map<String, dynamic> toMap() {
+    return {
+      'image': image is String ? image : null, // Se for String, inclua. Caso contrário, use null.
+      'product': product,
+    };
+  }
+
   // Construtor para inicializar a classe, com `product` opcional
   SectionItem({required this.image, this.product});
 

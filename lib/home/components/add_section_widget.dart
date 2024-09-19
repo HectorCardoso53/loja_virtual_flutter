@@ -4,8 +4,10 @@ import 'package:loja_virtual/models/section.dart';
 
 
 class AddSectionWidget extends StatelessWidget {
+
   const AddSectionWidget(this.homeManager);
   final HomeManager homeManager;
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -13,7 +15,7 @@ class AddSectionWidget extends StatelessWidget {
         Expanded(
           child: TextButton(
             onPressed: () {
-              homeManager.addSection(Section(type: 'List', name: '', items: []));
+              homeManager.addSection(Section(type: 'List'));
             },
             child: Text(
               'Adicionar Lista',
@@ -26,7 +28,7 @@ class AddSectionWidget extends StatelessWidget {
         Expanded(
           child: TextButton(
             onPressed: () {
-              homeManager.addSection(Section(type: 'Staggered', name: '', items: []));
+              homeManager.addSection(Section(type: 'Staggered'));
             },
             child: Text(
               'Adicionar Grade',

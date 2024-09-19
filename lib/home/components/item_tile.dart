@@ -42,7 +42,9 @@ class ItemTile extends StatelessWidget {
                     content: product != null
                         ? ListTile(
                             contentPadding: EdgeInsets.zero,
-                            leading: Image.network(product.images.first),
+                            leading: Image.network(product.images.isNotEmpty
+                                ? product.images.first
+                                : ''),
                             title: Text(
                               product.name,
                               style: TextStyle(
@@ -68,15 +70,23 @@ class ItemTile extends StatelessWidget {
                         ),
                       ),
                       TextButton(
-                        onPressed: () async{
+                        onPressed: () async {
                           if (product != null) {
                             // Desvincular produto
                             item.product = null;
                           } else {
-                            // Vincular produto logic here
-                            final Product product = await
-                            Navigator.of(context).pushNamed('/select_product') as Product;
-                            item.product = product?.id;
+                            // Vincular produto
+                            final result = await Navigator.of(context)
+                                .pushNamed('/select_product');
+
+                            // Verifica se o resultado não é nulo e é do tipo Product
+                            if (result != null && result is Product) {
+                              item.product = result.id;
+                            } else {
+                              // Lida com o caso onde nenhum produto foi selecionado ou o resultado é inválido
+                              print(
+                                  'Nenhum produto selecionado ou resultado inválido');
+                            }
                           }
                           Navigator.of(context).pop();
                         },
