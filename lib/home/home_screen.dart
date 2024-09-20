@@ -50,18 +50,18 @@ class HomeScreen extends StatelessWidget {
                   ),
                   Consumer2<UserManager, HomeManager>(
                     builder: (_, userManager, homeManager, __) {
-                      if (userManager.adminEnabled) {
+                      if (userManager.adminEnabled && !homeManager.loading) {
                         if (homeManager.editing) {
                           return PopupMenuButton(
-                            onSelected: (e){
-                              if(e == 'Salvar'){
+                            onSelected: (e) {
+                              if (e == 'Salvar') {
                                 homeManager.saveEditing();
-                              }else{
+                              } else {
                                 homeManager.discartEditing();
                               }
                             },
                             itemBuilder: (_) {
-                              return ['Salvar', ' Descartar'].map((e) {
+                              return ['Salvar', 'Descartar'].map((e) {
                                 return PopupMenuItem(
                                   value: e,
                                   child: Text(e),
@@ -82,7 +82,19 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              Consumer<HomeManager>(builder: (context, homeManager, child) {
+              Consumer<HomeManager>(builder: (_, homeManager, __) {
+                if (homeManager.loading) {
+                  print(
+                      'Carregando...'); // Para verificar se o estado de loading é chamado
+                  return SliverToBoxAdapter(
+                    child: LinearProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation(Colors.white),
+                      backgroundColor: Colors.transparent,
+                    ),
+                  );
+                }
+
+                // Renderiza as seções
                 final List<Widget> children =
                     homeManager.sections.map<Widget>((section) {
                   switch (section.type) {
@@ -95,8 +107,9 @@ class HomeScreen extends StatelessWidget {
                   }
                 }).toList();
 
-                if(homeManager.editing)
+                if (homeManager.editing)
                   children.add(AddSectionWidget(homeManager));
+
                 return SliverList(
                   delegate: SliverChildListDelegate(children),
                 );

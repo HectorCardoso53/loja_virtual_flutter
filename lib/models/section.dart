@@ -60,10 +60,11 @@ class Section extends ChangeNotifier {
     );
   }
 
-  Future<void> save() async {
+  Future<void> save(int pos) async {
     final Map<String, dynamic> data = {
       'name': name,
       'type': type,
+      'pos': pos
     };
 
     try {
@@ -89,8 +90,11 @@ class Section extends ChangeNotifier {
 
         if (await file.exists()) {
           try {
+            // Faz o upload da imagem
             final UploadTask task = storageRef.child(Uuid().v1()).putFile(file);
             final TaskSnapshot snapshot = await task;
+
+            // Obtém a URL da imagem
             final String url = await snapshot.ref.getDownloadURL();
             item.image = url; // Atualiza a imagem com a URL
           } catch (e) {
@@ -128,6 +132,24 @@ class Section extends ChangeNotifier {
 
     await firestoreRef.update(itemData);
   }
+
+  Future<void> delete() async {
+    await firestoreRef.delete();
+
+    for (final item in items) {
+      try {
+        final ref = storage.refFromURL(item.image);
+        await ref.delete();
+        print('Imagem ${item.image} deletada com sucesso.');
+      } catch (e) {
+        print('Falha ao deletar ${item.image}: $e');
+      }
+    }
+
+    // Notifique os listeners para atualizar a interface do usuário
+    notifyListeners();
+  }
+
 
   bool valid() {
     if (name.isEmpty) {
