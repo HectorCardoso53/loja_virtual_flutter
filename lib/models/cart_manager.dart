@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:loja_virtual/models/product.dart';
 import 'package:loja_virtual/models/user_manager.dart';
 import 'package:loja_virtual/models/users.dart';
+import 'package:loja_virtual/services/cepaberto_service.dart';
 
 import 'cart_product.dart';
 
@@ -148,5 +149,20 @@ class CartManager extends ChangeNotifier {
       if (!cartProduct.hasStock) return false;
     }
     return true;
+  }
+
+  //ENDEREÇO
+  Future<void> getAddress(String cep)async{
+    final cepAbertoService = CepAbertoService();
+
+    try{
+      final address = await cepAbertoService.getAddressFromCep(cep);
+
+      print(address);
+
+    }catch (e){
+      print(e);
+    }
+
   }
 }

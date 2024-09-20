@@ -48,6 +48,8 @@ dependencies:
   image_cropper: ^8.0.2
   firebase_storage: ^12.3.0
   uuid: ^4.5.0
+  dio: ^5.7.0
+  brasil_fields: ^1.15.0
 
 dev_dependencies:
   flutter_test:

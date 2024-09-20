@@ -7,12 +7,14 @@ import 'package:loja_virtual/models/home_manager.dart';
 import 'package:loja_virtual/models/product.dart';
 import 'package:loja_virtual/models/products_manager.dart';
 import 'package:loja_virtual/models/user_manager.dart';
+import 'package:loja_virtual/screens/address/address_screen.dart';
 import 'package:loja_virtual/screens/cart/cart_screem.dart';
 import 'package:loja_virtual/screens/edit_product/edit_product_screem.dart';
 import 'package:loja_virtual/screens/login/login_screen.dart';
 import 'package:loja_virtual/screens/product/product_screen.dart';
 import 'package:loja_virtual/screens/select_product/select_product_screen.dart';
 import 'package:loja_virtual/screens/signup/signup_screen.dart';
+import 'package:loja_virtual/services/cepaberto_service.dart';
 import 'package:provider/provider.dart';
 import 'screens/base/base_screen.dart';
 
@@ -20,6 +22,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(MyApp());
+
 }
 
 class MyApp extends StatelessWidget {
@@ -96,6 +99,10 @@ class MyApp extends StatelessWidget {
             case '/select_product':
               return MaterialPageRoute(
                 builder: (context) => SelectProductScreen(),
+              );
+            case '/address':
+              return MaterialPageRoute(
+                builder: (context) => AddressScreen(),
               );
             case '/base':
             default:

@@ -33,6 +33,7 @@ class CartScreem extends StatelessWidget {
                 onPressed: cartManager.isCartValid
                     ? () {
                   // Coloque a ação desejada aqui
+                  Navigator.of(context).pushNamed('/address');
                 }
                     : null, // Desabilita o botão quando não for válido
               ),
