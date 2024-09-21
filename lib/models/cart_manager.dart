@@ -16,16 +16,27 @@ class CartManager extends ChangeNotifier {
 
   Address? address;
   num productPrice = 0.0;
+  num? deliveryPrice;
+  num get totalPrice => productPrice + (deliveryPrice ?? 0.0);
+
+  bool _loading = false;
+  bool get loading => _loading;
+  set loading(bool value){
+    _loading = value;
+    notifyListeners();
+  }
 
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   // Atualiza o usuário e carrega os itens do carrinho
   void updateUser(UserManager userManager) {
     user = userManager.user;
+    productPrice = 0.0;
     items.clear();
-
+    removeAddress();
     if (user != null) {
       _loadCartItems();
+      _loadUserAddress();
     }
   }
 
@@ -58,6 +69,15 @@ class CartManager extends ChangeNotifier {
       print('Erro ao carregar itens do carrinho: $e');
     }
   }
+
+  Future<void> _loadUserAddress() async {
+    if (user?.address != null // Verifica se user e address não são nulos
+        && await calculateDelivery(user!.address!.lat, user!.address!.long)) {
+      address = user!.address;
+      notifyListeners();
+    }
+  }
+
 
   // Adiciona um produto ao carrinho
   void addToCart(Product product) {
@@ -157,14 +177,24 @@ class CartManager extends ChangeNotifier {
     return true;
   }
 
-  void setAddress(Address address){
-    this.address = address;
-    calculateDelivery(address.lat, address.long);
+  bool get isAddressValid => address != null && deliveryPrice != null;
 
+  Future<void> setAddress(Address address)async{
+    loading = true;
+    this.address = address;
+
+    if(await calculateDelivery(address.lat, address.long)){
+      user?.setAddress(address);
+      loading = false;
+    }else{
+      loading = false;
+      return Future.error('Endereço fora do raio de entrega:(');
+    }
   }
 
   //ENDEREÇO
   Future<void> getAddress(String cep) async {
+    loading = true;
     final cepAbertoService = CepAbertoService();
 
     try {
@@ -183,26 +213,30 @@ class CartManager extends ChangeNotifier {
           long: cepAbertoAddress.longitude ?? 0.0,
         );
 
-        // Fazer algo com o objeto `address`, como salvá-lo ou usá-lo.
-        notifyListeners();
       }
+      loading = false;
     } catch (e) {
-      // Lidar com possíveis erros, como exibir uma mensagem para o usuário
-      print('Erro ao buscar endereço: $e');
+      loading = false;
+     return Future.error('CEP inválido ');
     }
+
   }
 
   void removeAddress(){
     address = null;
+    deliveryPrice = null;
     notifyListeners();
   }
 
-  Future<void> calculateDelivery(double lat, double long) async {
+  Future<bool> calculateDelivery(double lat, double long) async {
     final DocumentSnapshot doc = await firestore.doc('aux/delivery').get();
 
     // Corrigir para doc.data() e usar os colchetes corretamente
     final latStore = (doc.data() as Map<String, dynamic>)['lat'] as double;
     final longStore = (doc.data() as Map<String, dynamic>)['long'] as double;
+
+    final base = (doc.data() as Map<String, dynamic>)['base'] as num;
+    final km = (doc.data() as Map<String, dynamic>)['km'] as num;
     final maxKm = (doc.data() as Map<String, dynamic>)['maxKm'] as num;
 
     // Corrigir o nome do método para `distanceBetween`
@@ -211,5 +245,12 @@ class CartManager extends ChangeNotifier {
     dis /= 1000.0;
 
     print('Distância: $dis km');
+
+    if(dis>maxKm){
+      return false;
+    }
+
+    deliveryPrice = base + dis * km;
+    return true;
   }
 }

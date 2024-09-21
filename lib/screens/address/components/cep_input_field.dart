@@ -7,7 +7,6 @@ import 'package:loja_virtual/models/cart_manager.dart';
 import 'package:provider/provider.dart';
 
 class CepInputField extends StatefulWidget {
-
   final Address address;
 
   CepInputField(this.address);
@@ -17,7 +16,6 @@ class CepInputField extends StatefulWidget {
 }
 
 class _CepInputFieldState extends State<CepInputField> {
-
   final TextEditingController cepController = TextEditingController();
 
   @override
@@ -30,6 +28,7 @@ class _CepInputFieldState extends State<CepInputField> {
   @override
   Widget build(BuildContext context) {
     final address = widget.address;
+    final cartManager = context.watch<CartManager>();
 
     // Caso o zipCode ainda não esteja preenchido, exibe o TextFormField para preencher o CEP
     if (address.zipCode == null || address.zipCode!.isEmpty) {
@@ -37,6 +36,7 @@ class _CepInputFieldState extends State<CepInputField> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           TextFormField(
+            enabled: !cartManager.loading,
             controller: cepController,
             decoration: InputDecoration(
               isDense: true,
@@ -47,8 +47,8 @@ class _CepInputFieldState extends State<CepInputField> {
               ),
               border: const OutlineInputBorder(
                 borderSide: BorderSide(
-                  color: Color.fromARGB(
-                      255, 4, 125, 141), // Cor padrão da borda
+                  color:
+                      Color.fromARGB(255, 4, 125, 141), // Cor padrão da borda
                 ),
               ),
               enabledBorder: const OutlineInputBorder(
@@ -64,8 +64,8 @@ class _CepInputFieldState extends State<CepInputField> {
                 ),
               ),
               errorBorder: const OutlineInputBorder(
-                borderSide: BorderSide(
-                    color: Colors.red), // Cor da borda com erro
+                borderSide:
+                    BorderSide(color: Colors.red), // Cor da borda com erro
               ),
               focusedErrorBorder: const OutlineInputBorder(
                 borderSide: BorderSide(
@@ -88,20 +88,35 @@ class _CepInputFieldState extends State<CepInputField> {
             },
           ),
           const SizedBox(height: 16),
+          if (cartManager.loading)
+            LinearProgressIndicator(
+              valueColor:
+                  AlwaysStoppedAnimation(Theme.of(context).primaryColor),
+              backgroundColor: Colors.transparent,
+            ),
           ElevatedButton(
-            onPressed: () {
-              if (Form.of(context).validate()) {
-                context.read<CartManager>().getAddress(cepController.text);
-              }
-            },
+            onPressed: !cartManager.loading
+                ? () async {
+                    if (Form.of(context).validate()) {
+                      try {
+                        await context
+                            .read<CartManager>()
+                            .getAddress(cepController.text);
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('$e'),
+                            backgroundColor: Colors.redAccent,
+                          ),
+                        );
+                      }
+                    }
+                  }
+                : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Theme
-                  .of(context)
-                  .primaryColor,
-              disabledBackgroundColor: Theme
-                  .of(context)
-                  .primaryColor
-                  .withAlpha(100),
+              backgroundColor: Theme.of(context).primaryColor,
+              disabledBackgroundColor:
+                  Theme.of(context).primaryColor.withAlpha(100),
             ),
             child: const Text(
               'Buscar CEP',
@@ -114,19 +129,20 @@ class _CepInputFieldState extends State<CepInputField> {
       return Row(
         children: [
           Expanded(
-            child: Text('CEP: ${address.zipCode}', style: TextStyle(color: Theme
-                .of(context)
-                .primaryColor,
-              fontWeight: FontWeight.w600,
-              fontSize: 18
-            ),
+            child: Text(
+              'CEP: ${address.zipCode}',
+              style: TextStyle(
+                  color: Theme.of(context).primaryColor,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 18),
             ),
           ),
-          CustomIconButton(iconData: Icons.edit,
+          CustomIconButton(
+            iconData: Icons.edit,
             color: Theme.of(context).primaryColor,
-          onTap: (){
-            context.read<CartManager>().removeAddress();
-          },
+            onTap: () {
+              context.read<CartManager>().removeAddress();
+            },
           ),
         ],
       );

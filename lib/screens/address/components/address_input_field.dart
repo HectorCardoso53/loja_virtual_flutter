@@ -32,6 +32,7 @@ class AddressInputField extends StatelessWidget {
               height: 15,
             ),
             TextFormField(
+              enabled: !cartManager.loading,
               controller: streetController,
               decoration: const InputDecoration(
                 isDense: true,
@@ -83,6 +84,7 @@ class AddressInputField extends StatelessWidget {
               children: [
                 Expanded(
                   child: TextFormField(
+                    enabled: !cartManager.loading,
                     controller: numberController,
                     decoration: const InputDecoration(
                       isDense: true,
@@ -136,6 +138,7 @@ class AddressInputField extends StatelessWidget {
                 SizedBox(width: 16),
                 Expanded(
                   child: TextFormField(
+                    enabled: !cartManager.loading,
                     controller: complementController,
                     decoration: const InputDecoration(
                       isDense: true,
@@ -187,6 +190,7 @@ class AddressInputField extends StatelessWidget {
               height: 15,
             ),
             TextFormField(
+              enabled: !cartManager.loading,
               controller: districtController,
               decoration: const InputDecoration(
                 isDense: true,
@@ -344,14 +348,28 @@ class AddressInputField extends StatelessWidget {
               ],
             ),
             SizedBox(height: 16),
+            if(cartManager.loading)
+              LinearProgressIndicator(
+                valueColor: AlwaysStoppedAnimation(Theme.of(context).primaryColor),
+                backgroundColor: Colors.transparent,
+              ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: !cartManager.loading ?() async {
                 // Adicione qualquer lógica adicional que você precise aqui
-                if(Form.of(context).validate()){
+                if (Form.of(context).validate()) {
                   Form.of(context).save();
-                  context.read<CartManager>().setAddress(address);
+                  try {
+                    await context.read<CartManager>().setAddress(address);
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('$e'),
+                        backgroundColor: Colors.redAccent,
+                      ),
+                    );
+                  }
                 }
-              },
+              }:null,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Theme.of(context).primaryColor,
                 disabledBackgroundColor:
