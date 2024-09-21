@@ -1,17 +1,23 @@
 import 'package:brasil_fields/brasil_fields.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:loja_virtual/common/custom_icon_button.dart';
+import 'package:loja_virtual/models/address.dart';
 import 'package:loja_virtual/models/cart_manager.dart';
 import 'package:provider/provider.dart';
 
 class CepInputField extends StatefulWidget {
-  const CepInputField({super.key});
+
+  final Address address;
+
+  CepInputField(this.address);
 
   @override
   _CepInputFieldState createState() => _CepInputFieldState();
 }
 
 class _CepInputFieldState extends State<CepInputField> {
+
   final TextEditingController cepController = TextEditingController();
 
   @override
@@ -23,71 +29,107 @@ class _CepInputFieldState extends State<CepInputField> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        TextFormField(
-          controller: cepController,
-          decoration: InputDecoration(
-            isDense: true,
-            labelText: 'CEP',
-            hintText: '68.270-000',
-            labelStyle: const TextStyle(
-              color: Color.fromARGB(255, 4, 125, 141), // Cor do label
-            ),
-            border: const OutlineInputBorder(
-              borderSide: BorderSide(
-                color: Color.fromARGB(255, 4, 125, 141), // Cor padrão da borda
+    final address = widget.address;
+
+    // Caso o zipCode ainda não esteja preenchido, exibe o TextFormField para preencher o CEP
+    if (address.zipCode == null || address.zipCode!.isEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          TextFormField(
+            controller: cepController,
+            decoration: InputDecoration(
+              isDense: true,
+              labelText: 'CEP',
+              hintText: '68.270-000',
+              labelStyle: const TextStyle(
+                color: Color.fromARGB(255, 4, 125, 141), // Cor do label
+              ),
+              border: const OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: Color.fromARGB(
+                      255, 4, 125, 141), // Cor padrão da borda
+                ),
+              ),
+              enabledBorder: const OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: Color.fromARGB(
+                      255, 4, 125, 141), // Cor da borda quando não focado
+                ),
+              ),
+              focusedBorder: const OutlineInputBorder(
+                borderSide: BorderSide(
+                  color: Color.fromARGB(
+                      255, 4, 125, 141), // Cor da borda quando focado
+                ),
+              ),
+              errorBorder: const OutlineInputBorder(
+                borderSide: BorderSide(
+                    color: Colors.red), // Cor da borda com erro
+              ),
+              focusedErrorBorder: const OutlineInputBorder(
+                borderSide: BorderSide(
+                    color: Colors.red), // Cor da borda com erro e focado
               ),
             ),
-            enabledBorder: const OutlineInputBorder(
-              borderSide: BorderSide(
-                color: Color.fromARGB(255, 4, 125, 141), // Cor da borda quando não focado
-              ),
+            style: const TextStyle(
+              color: Color.fromARGB(255, 4, 125, 141), // Cor do texto digitado
             ),
-            focusedBorder: const OutlineInputBorder(
-              borderSide: BorderSide(
-                color: Color.fromARGB(255, 4, 125, 141), // Cor da borda quando focado
-              ),
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly, // Permite apenas dígitos
+              CepInputFormatter(),
+            ],
+            keyboardType: TextInputType.number,
+            validator: (cep) {
+              if (cep!.isEmpty)
+                return 'Campo Obrigatório';
+              else if (cep.length != 10) return 'CEP inválido';
+              return null;
+            },
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton(
+            onPressed: () {
+              if (Form.of(context).validate()) {
+                context.read<CartManager>().getAddress(cepController.text);
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme
+                  .of(context)
+                  .primaryColor,
+              disabledBackgroundColor: Theme
+                  .of(context)
+                  .primaryColor
+                  .withAlpha(100),
             ),
-            errorBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.red), // Cor da borda com erro
-            ),
-            focusedErrorBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.red), // Cor da borda com erro e focado
+            child: const Text(
+              'Buscar CEP',
+              style: TextStyle(color: Colors.white),
             ),
           ),
-          style: const TextStyle(
-            color: Color.fromARGB(255, 4, 125, 141), // Cor do texto digitado
+        ],
+      );
+    } else {
+      return Row(
+        children: [
+          Expanded(
+            child: Text('CEP: ${address.zipCode}', style: TextStyle(color: Theme
+                .of(context)
+                .primaryColor,
+              fontWeight: FontWeight.w600,
+              fontSize: 18
+            ),
+            ),
           ),
-          inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly, // Permite apenas dígitos
-            CepInputFormatter(),
-          ],
-          keyboardType: TextInputType.number,
-          validator: (cep) {
-            if (cep!.isEmpty) return 'Campo Obrigatório';
-            else if (cep.length != 10) return 'CEP inválido';
-            return null;
+          CustomIconButton(iconData: Icons.edit,
+            color: Theme.of(context).primaryColor,
+          onTap: (){
+            context.read<CartManager>().removeAddress();
           },
-        ),
-        const SizedBox(height: 16),
-        ElevatedButton(
-          onPressed: () {
-            if (Form.of(context).validate()) {
-              context.read<CartManager>().getAddress(cepController.text);
-            }
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Theme.of(context).primaryColor,
-            disabledBackgroundColor: Theme.of(context).primaryColor.withAlpha(100),
           ),
-          child: const Text(
-            'Buscar CEP',
-            style: TextStyle(color: Colors.white),
-          ),
-        ),
-      ],
-    );
+        ],
+      );
+    }
   }
 }

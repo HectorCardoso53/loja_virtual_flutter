@@ -21,8 +21,19 @@ import 'screens/base/base_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(MyApp());
 
+  // Chama a função assíncrona para obter o endereço de um CEP
+  await getAddress();
+
+  runApp(MyApp());
+}
+
+Future<void> getAddress() async {
+  try {
+    CepAbertoService().getAddressFromCep('68.005-020').then((address)=>print(address));
+  } catch (e) {
+    print('Erro ao buscar CEP: $e');
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -52,8 +63,7 @@ class MyApp extends StatelessWidget {
           create: (_) => AdminUsersManager(),
           lazy: false,
           update: (_, userManager, adminUsersManager) =>
-          (adminUsersManager ?? AdminUsersManager())
-            ..updateUser(userManager),
+          (adminUsersManager ?? AdminUsersManager())..updateUser(userManager),
         ),
       ],
       child: MaterialApp(

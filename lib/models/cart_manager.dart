@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:loja_virtual/models/address.dart';
 import 'package:loja_virtual/models/product.dart';
 import 'package:loja_virtual/models/user_manager.dart';
 import 'package:loja_virtual/models/users.dart';
@@ -11,7 +13,11 @@ class CartManager extends ChangeNotifier {
   List<CartProduct> items = [];
 
   Users? user; // Pode ser nulo
+
+  Address? address;
   num productPrice = 0.0;
+
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   // Atualiza o usuário e carrega os itens do carrinho
   void updateUser(UserManager userManager) {
@@ -151,18 +157,59 @@ class CartManager extends ChangeNotifier {
     return true;
   }
 
+  void setAddress(Address address){
+    this.address = address;
+    calculateDelivery(address.lat, address.long);
+
+  }
+
   //ENDEREÇO
-  Future<void> getAddress(String cep)async{
+  Future<void> getAddress(String cep) async {
     final cepAbertoService = CepAbertoService();
 
-    try{
-      final address = await cepAbertoService.getAddressFromCep(cep);
+    try {
+      final cepAbertoAddress = await cepAbertoService.getAddressFromCep(cep);
 
-      print(address);
+      print(cepAbertoAddress);
 
-    }catch (e){
-      print(e);
+      if (cepAbertoAddress != null) {
+        address = Address(
+          street: cepAbertoAddress.logradouro ?? '',
+          district: cepAbertoAddress.bairro ?? '',
+          zipCode: cepAbertoAddress.cep ?? '',
+          city: cepAbertoAddress.cidade.nome ?? '',
+          state: cepAbertoAddress.estado.sigla ?? '',
+          lat: cepAbertoAddress.latitude ?? 0.0,
+          long: cepAbertoAddress.longitude ?? 0.0,
+        );
+
+        // Fazer algo com o objeto `address`, como salvá-lo ou usá-lo.
+        notifyListeners();
+      }
+    } catch (e) {
+      // Lidar com possíveis erros, como exibir uma mensagem para o usuário
+      print('Erro ao buscar endereço: $e');
     }
+  }
 
+  void removeAddress(){
+    address = null;
+    notifyListeners();
+  }
+
+  Future<void> calculateDelivery(double lat, double long) async {
+    final DocumentSnapshot doc = await firestore.doc('aux/delivery').get();
+
+    // Corrigir para doc.data() e usar os colchetes corretamente
+    final latStore = (doc.data() as Map<String, dynamic>)['lat'] as double;
+    final longStore = (doc.data() as Map<String, dynamic>)['long'] as double;
+    final maxKm = (doc.data() as Map<String, dynamic>)['maxKm'] as num;
+
+    // Corrigir o nome do método para `distanceBetween`
+    double dis = await Geolocator.distanceBetween(latStore, longStore, lat, long);
+
+    dis /= 1000.0;
+
+    print('Distância: $dis km');
   }
 }

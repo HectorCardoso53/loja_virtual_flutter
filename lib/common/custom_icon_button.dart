@@ -6,11 +6,13 @@ class CustomIconButton extends StatelessWidget {
     required this.iconData,
     required this.color,
     this.onTap,
+    this.size, // Parâmetro opcional
   });
 
   final IconData iconData;
   final Color color;
   final VoidCallback? onTap;
+  final double? size; // Definindo como opcional usando o `?`
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +28,8 @@ class CustomIconButton extends StatelessWidget {
               padding: const EdgeInsets.all(5),
               child: Icon(
                 iconData,
-                color: onTap == null ? Colors.grey[400] : color, // Cor do ícone desativado
+                color: onTap == null ? Colors.grey[400] : color,
+                size: size ?? 24, // Valor padrão de 24 se `size` for nulo
               ),
             ),
           ),

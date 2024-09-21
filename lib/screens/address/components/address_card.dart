@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:loja_virtual/models/address.dart';
+import 'package:loja_virtual/models/cart_manager.dart';
+import 'package:provider/provider.dart';
 
+import 'address_input_field.dart';
 import 'cep_input_field.dart';
 
 class AddressCard extends StatelessWidget {
@@ -12,22 +16,33 @@ class AddressCard extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-        child: Form(
+        child: Consumer<CartManager>(
+          builder: (_, cartManager, __) {
+            final address = cartManager.address ?? Address(); // Obtém o endereço ou instancia um novo
+            print(address);
 
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Endereço de Entrega',
-                style: TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
+            return Form(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Endereço de Entrega',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Campo de entrada de CEP
+                  CepInputField(address),
+                  // Exibe o AddressInputField apenas se o zipCode estiver preenchido
+                  if (address.zipCode != null && address.zipCode.isNotEmpty)
+                    AddressInputField(),
+                ],
               ),
-              SizedBox(height: 16,),
-              CepInputField(),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
