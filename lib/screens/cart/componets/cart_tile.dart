@@ -21,7 +21,12 @@ class CartTile extends StatelessWidget {
               SizedBox(
                 height: 80,
                 width: 80,
-                child: Image.network(cartProduct.product!.images.first),
+                child: cartProduct.product?.images != null && cartProduct.product!.images.isNotEmpty
+                    ? Image.network(cartProduct.product!.images.first)
+                    : Container(
+                  color: Colors.grey,
+                  child: Icon(Icons.image_not_supported),
+                ),
               ),
               Expanded(
                 child: Padding(
@@ -30,7 +35,7 @@ class CartTile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        cartProduct.product!.name,
+                        cartProduct.product?.name ?? 'Nome indisponível',
                         style: TextStyle(
                           fontWeight: FontWeight.w500,
                           fontSize: 17,
@@ -39,23 +44,24 @@ class CartTile extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         child: Text(
-                          'Tamanho : ${cartProduct.size}',
+                          'Tamanho: ${cartProduct.size ?? 'Indisponível'}',
                           style: TextStyle(
                             fontWeight: FontWeight.w300,
                           ),
                         ),
                       ),
                       Consumer<CartProduct>(
-                        builder: (context,cartProduct,child){
-                          if(cartProduct.hasStock)
-                          return Text(
-                            'R\$ ${cartProduct.unitPrice.toStringAsFixed(2)}',
-                            style: TextStyle(
+                        builder: (context, cartProduct, child) {
+                          if (cartProduct.hasStock) {
+                            return Text(
+                              'R\$ ${cartProduct.unitPrice.toStringAsFixed(2)}',
+                              style: TextStyle(
                                 color: Theme.of(context).primaryColor,
                                 fontSize: 16,
-                                fontWeight: FontWeight.bold),
-                          );
-                          else
+                                fontWeight: FontWeight.bold,
+                              ),
+                            );
+                          } else {
                             return Text(
                               'Sem estoque disponível',
                               style: TextStyle(
@@ -63,6 +69,7 @@ class CartTile extends StatelessWidget {
                                 fontSize: 12,
                               ),
                             );
+                          }
                         },
                       ),
                     ],

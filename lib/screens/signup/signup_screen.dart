@@ -16,7 +16,7 @@ class SignupScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 4, 125, 141),
-        title: Text(
+        title: const Text(
           'Criar Conta',
           style: TextStyle(
             color: Colors.white,
@@ -245,7 +245,7 @@ class SignupScreen extends StatelessWidget {
 
                                 if (user.password != user.confirmPassword) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
+                                    const SnackBar(
                                       content: Text('Senhas não coincidem!!'),
                                       backgroundColor: Colors.red,
                                     ),
@@ -275,7 +275,7 @@ class SignupScreen extends StatelessWidget {
                             Theme.of(context).primaryColor.withAlpha(100),
                       ),
                       child: userManager.loading
-                          ? CircularProgressIndicator(
+                          ? const CircularProgressIndicator(
                               valueColor: AlwaysStoppedAnimation(
                                 Colors.white,
                               ),

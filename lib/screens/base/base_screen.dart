@@ -4,7 +4,8 @@ import 'package:loja_virtual/home/home_screen.dart';
 import 'package:loja_virtual/models/page_manager.dart';
 import 'package:loja_virtual/models/user_manager.dart';
 import 'package:loja_virtual/screens/admin_users/admin_users_screen.dart';
-import 'package:loja_virtual/screens/login/login_screen.dart';
+import 'package:loja_virtual/screens/orders/components/order_tile.dart';
+import 'package:loja_virtual/screens/orders/orders_screen.dart';
 import 'package:loja_virtual/screens/products/Products_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -30,13 +31,7 @@ class _BaseScreenState extends State<BaseScreen> {
             children: [
               HomeScreen(),
               ProductsScreen(),
-              Scaffold(
-                drawer: CustomDrawer(),
-                appBar: AppBar(
-                  backgroundColor: const Color.fromARGB(255, 4, 125, 141),
-                  title: Text('Home3',style: TextStyle(color: Colors.white),),
-                ),
-              ),
+              OrdersScreen(),
               Scaffold(
                 drawer: CustomDrawer(),
                 appBar: AppBar(

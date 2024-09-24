@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:loja_virtual/common/price_card.dart';
 import 'package:loja_virtual/models/cart_manager.dart';
 import 'package:provider/provider.dart';
-
 import 'components/address_card.dart';
 
 class AddressScreen extends StatelessWidget {
@@ -29,7 +28,7 @@ class AddressScreen extends StatelessWidget {
               return PriceCard(
                 buttonText: 'Continuar para pagamento',
                 onPressed: cartManager.isAddressValid ? (){
-
+                  Navigator.of(context).pushNamed('/checkout');
                 }: null,
               );
             },

@@ -4,52 +4,82 @@ import 'package:loja_virtual/models/product.dart';
 import 'item_size.dart';
 
 class CartProduct extends ChangeNotifier {
+  late String id; // ID do documento no Firestore
+  Product? _product; // Produto vinculado ao item do carrinho
+  bool _isLoading = true; // Para controlar o estado de carregamento
+  late String productId; // ID do produto
+  late int quantity; // Quantidade do item no carrinho
+  late String size; // Tamanho do produto
+  num? fixedPrice; // Preço fixo, se aplicável
 
-  // Adicionando 'id' para referenciar o documento no Firestore
-  late String id;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  // Construtor que inicializa as variáveis
-  CartProduct.fromProduct(this.product) {
-    productId = product!.id;
+  // Getters
+  Product? get product => _product;
+  bool get isLoading => _isLoading;
+  num get unitPrice => _product?.findSize(size)?.price ?? 0; // Preço por unidade
+  num get totalPrice => unitPrice * quantity; // Preço total
+  bool get hasStock {
+    final itemSize = _product?.findSize(size);
+    return itemSize != null && itemSize.stock >= quantity; // Verifica estoque
+  }
+
+  set product(Product? value) {
+    _product = value;
+    notifyListeners();
+  }
+
+  // Construtores
+  CartProduct.fromProduct(this._product) {
+    productId = _product!.id;
     quantity = 1;
-    size = product!.selectedSize?.name ?? ''; // Garantir que 'name' não seja nulo
-    id = ''; // ID será atribuído quando o produto for salvo no Firestore
+    size = _product!.selectedSize?.name ?? '';
+    id = '';
+    _isLoading = false;
   }
 
   CartProduct.fromDocument(DocumentSnapshot document) {
     id = document.id;
-    productId = (document.data() as Map<String, dynamic>)['pid'] as String;
-    quantity = (document.data() as Map<String, dynamic>)['quantity'] as int;
-    size = (document.data() as Map<String, dynamic>)['size'] as String;
-
-    firestore.doc('products/$productId').get().then(
-          (doc) {
-             product = Product.fromDocument(doc);
-             notifyListeners();
-          }
-    );
+    _initializeFromMap(document.data() as Map<String, dynamic>);
+    _loadProduct();
   }
 
-  final FirebaseFirestore firestore = FirebaseFirestore.instance;
-  Product? product;
-
-  late String productId;
-  late int quantity;
-  late String size;
-
-  ItemSize? get itemSize {
-    if (product == null) return null;
-    return product!.findSize(size);
+  CartProduct.fromMap(Map<String, dynamic> map) {
+    _initializeFromMap(map);
+    _loadProduct();
   }
 
-  num get unitPrice {
-    if (product == null) return 0;
-    return itemSize?.price ?? 0;
+  void _initializeFromMap(Map<String, dynamic> map) {
+    productId = map['pid'] as String;
+    quantity = map['quantity'] as int;
+    size = map['size'] as String;
+    fixedPrice = map['fixedPrice'] as num? ?? 0; // Valor padrão se null
   }
 
-  num get totalPrice => unitPrice * quantity;
+  // Carregar o produto do Firestore
+  Future<void> _loadProduct() async {
+    _isLoading = true;
+    notifyListeners();
 
-  // Adicionando 'id' no mapa de dados
+    try {
+      DocumentSnapshot doc = await firestore.doc('products/$productId').get();
+      if (doc.exists) {
+        _product = Product.fromDocument(doc);
+        print('Produto carregado: ${_product!.name}');
+      } else {
+        print('Produto não encontrado');
+        _product = null;
+      }
+    } catch (e) {
+      print('Erro ao carregar produto: $e');
+      _product = null;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Mapa de dados para salvar o item do carrinho
   Map<String, dynamic> toCartItemMap() {
     return {
       'pid': productId,
@@ -58,25 +88,32 @@ class CartProduct extends ChangeNotifier {
     };
   }
 
+  // Verifica se o produto pode ser empilhado
   bool stackable(Product product) {
     return product.id == productId && product.selectedSize!.name == size;
   }
 
+  // Incrementa a quantidade do item
   void increment() {
     quantity++;
     notifyListeners();
   }
 
+  // Decrementa a quantidade do item
   void decrement() {
-    quantity--;
-    notifyListeners();
+    if (quantity > 1) {
+      quantity--;
+      notifyListeners();
+    }
   }
 
-  bool get hasStock{
-    final size= itemSize;
-    if(size==null) return false;
-    return size.stock >= quantity;
-
+  // Mapa de dados para salvar o item do pedido
+  Map<String, dynamic> toOrderItemMap() {
+    return {
+      'pid': productId,
+      'quantity': quantity,
+      'size': size,
+      'fixedPrice': fixedPrice ?? unitPrice,
+    };
   }
-
 }

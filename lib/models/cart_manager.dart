@@ -40,6 +40,14 @@ class CartManager extends ChangeNotifier {
     }
   }
 
+  void clear(){
+   for(final cartProduct in items){
+     user!.cartReference.doc(cartProduct.id).delete();
+   }
+   items.clear();
+   notifyListeners();
+  }
+
   // Carrega os itens do carrinho do Firestore
   Future<void> _loadCartItems() async {
     try {

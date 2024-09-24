@@ -4,17 +4,18 @@ import 'package:flutter/material.dart';
 import 'package:loja_virtual/models/admin_users_manager.dart';
 import 'package:loja_virtual/models/cart_manager.dart';
 import 'package:loja_virtual/models/home_manager.dart';
+import 'package:loja_virtual/models/orders_manager.dart';
 import 'package:loja_virtual/models/product.dart';
 import 'package:loja_virtual/models/products_manager.dart';
 import 'package:loja_virtual/models/user_manager.dart';
 import 'package:loja_virtual/screens/address/address_screen.dart';
 import 'package:loja_virtual/screens/cart/cart_screem.dart';
+import 'package:loja_virtual/screens/checkout/checkout_screen.dart';
 import 'package:loja_virtual/screens/edit_product/edit_product_screem.dart';
 import 'package:loja_virtual/screens/login/login_screen.dart';
 import 'package:loja_virtual/screens/product/product_screen.dart';
 import 'package:loja_virtual/screens/select_product/select_product_screen.dart';
 import 'package:loja_virtual/screens/signup/signup_screen.dart';
-import 'package:loja_virtual/services/cepaberto_service.dart';
 import 'package:provider/provider.dart';
 import 'screens/base/base_screen.dart';
 
@@ -22,19 +23,10 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
 
-  // Chama a função assíncrona para obter o endereço de um CEP
-  await getAddress();
 
   runApp(MyApp());
 }
 
-Future<void> getAddress() async {
-  try {
-    CepAbertoService().getAddressFromCep('68.005-020').then((address)=>print(address));
-  } catch (e) {
-    print('Erro ao buscar CEP: $e');
-  }
-}
 
 class MyApp extends StatelessWidget {
   @override
@@ -57,13 +49,24 @@ class MyApp extends StatelessWidget {
           create: (context) => CartManager(),
           lazy: false,
           update: (context, userManager, cartManager) =>
-          (cartManager ?? CartManager())..updateUser(userManager),
+              (cartManager ?? CartManager())..updateUser(userManager),
+        ),
+        ChangeNotifierProxyProvider<UserManager, OrdersManager>(
+          create: (_) => OrdersManager(),
+          lazy: false,
+          update: (_, userManager, ordersManager) {
+            if (userManager.user != null) {
+              return (ordersManager ?? OrdersManager())..updateUser(userManager.user!);
+            }
+            return ordersManager ?? OrdersManager(); // Retorna um novo OrdersManager se ordersManager for nulo
+          },
         ),
         ChangeNotifierProxyProvider<UserManager, AdminUsersManager>(
           create: (_) => AdminUsersManager(),
           lazy: false,
           update: (_, userManager, adminUsersManager) =>
-          (adminUsersManager ?? AdminUsersManager())..updateUser(userManager),
+              (adminUsersManager ?? AdminUsersManager())
+                ..updateUser(userManager),
         ),
       ],
       child: MaterialApp(
@@ -104,8 +107,7 @@ class MyApp extends StatelessWidget {
               );
             case '/cart':
               return MaterialPageRoute(
-                builder: (context) => CartScreem(),
-              );
+                  builder: (context) => CartScreem(), settings: settings);
             case '/select_product':
               return MaterialPageRoute(
                 builder: (context) => SelectProductScreen(),
@@ -114,11 +116,14 @@ class MyApp extends StatelessWidget {
               return MaterialPageRoute(
                 builder: (context) => AddressScreen(),
               );
+            case '/checkout':
+              return MaterialPageRoute(
+                builder: (context) => CheckoutScreen(),
+              );
             case '/base':
             default:
               return MaterialPageRoute(
-                builder: (context) => BaseScreen(),
-              );
+                  builder: (context) => BaseScreen(), settings: settings);
           }
         },
       ),
