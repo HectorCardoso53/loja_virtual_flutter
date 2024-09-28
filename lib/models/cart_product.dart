@@ -19,7 +19,9 @@ class CartProduct extends ChangeNotifier {
   bool get isLoading => _isLoading;
   num get unitPrice => _product?.findSize(size)?.price ?? 0; // Preço por unidade
   num get totalPrice => unitPrice * quantity; // Preço total
+
   bool get hasStock {
+    if(product != null && product!.deleted ) return false;
     final itemSize = _product?.findSize(size);
     return itemSize != null && itemSize.stock >= quantity; // Verifica estoque
   }

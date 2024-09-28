@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:loja_virtual/helpers/validators.dart';
 import 'package:loja_virtual/models/user_manager.dart';
 import 'package:loja_virtual/screens/signup/signup_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:sign_in_button/sign_in_button.dart';
 
 class LoginScreen extends StatelessWidget {
   final TextEditingController emailcontroller = TextEditingController();
@@ -40,6 +42,14 @@ class LoginScreen extends StatelessWidget {
             child: Consumer<UserManager>(
               builder: (context, userManager, child) {
                 // Retorna o ListView explicitamente
+                if(userManager.loadingFace){
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation(Theme.of(context).primaryColor),
+                    ),
+                  );
+                }
                 return ListView(
                   padding: const EdgeInsets.all(16),
                   shrinkWrap: true,
@@ -156,15 +166,18 @@ class LoginScreen extends StatelessWidget {
                                         ScaffoldMessenger.of(context)
                                             .showSnackBar(
                                           SnackBar(
-                                            content: Text('Falha ao entrar: $errorMessage'),
+                                            content: Text(
+                                                'Falha ao entrar: $errorMessage'),
                                             backgroundColor: Colors.red,
                                           ),
                                         );
                                       },
                                       onSuccess: () {
-                                        // Navegue ou execute alguma ação ao logar com sucesso
+                                        // Faz o pop na tela de login e retorna para a tela anterior
                                         Navigator.of(context).pop();
                                       },
+                                      context:
+                                          context, // Certifique-se de passar o context aqui
                                     );
                               }
                             },
@@ -180,6 +193,43 @@ class LoginScreen extends StatelessWidget {
                           : Text(
                               'Entrar',
                               style: TextStyle(color: Colors.white),
+                            ),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                              userManager.signInWithGoogle(
+                                onSuccess: () {
+                                  // Você pode realizar alguma ação adicional aqui se precisar
+                                },
+                                onFail: (errorMessage) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          'Falha ao entrar com Google: $errorMessage'),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                },
+                                context: context, // Passa o contexto aqui
+                              );
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).primaryColor,
+                        disabledBackgroundColor:
+                            Theme.of(context).primaryColor.withAlpha(100),
+                      ),
+                      child:Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.g_mobiledata,
+                                  color: Colors.white,
+                                ),
+                                Text(
+                                  'Entra com Google',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              ],
                             ),
                     ),
                   ],

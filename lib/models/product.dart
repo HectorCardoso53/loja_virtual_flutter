@@ -13,13 +13,15 @@ class Product extends ChangeNotifier {
   List<String> images;
   List<ItemSize> sizes;
 
+  bool deleted;
+
   List<dynamic> newImages = [];
   ItemSize? _selectedSize;
   ItemSize? get selectedSize => _selectedSize;
 
   bool _loading = false;
   bool get loading => _loading;
-  set loading(bool value){
+  set loading(bool value) {
     _loading = value;
     notifyListeners();
   }
@@ -37,18 +39,20 @@ class Product extends ChangeNotifier {
     return stock;
   }
 
-  bool get hasStock {
-    return totalStock > 0;
-  }
+  bool get hasStock => totalStock > 0 && !deleted;
 
   num get basePrice {
     num lowest = double.infinity;
     for (final size in sizes) {
-      if (size.price < lowest && size.hasStock) {
+      if (size.price < lowest ) {
         lowest = size.price;
       }
     }
     return lowest;
+  }
+
+  void delete(){
+    firestoreRef.update({'deleted': true});
   }
 
   ItemSize? findSize(String name) {
@@ -75,7 +79,8 @@ class Product extends ChangeNotifier {
       'name': name,
       'description': description,
       'sizes': exportSizeList(),
-      'images': images
+      'images': images,
+      'deleted': deleted,
     };
 
     try {
@@ -94,29 +99,12 @@ class Product extends ChangeNotifier {
 
     final List<String> updateImages = [];
 
+    // Upload das novas imagens
     for (final newImage in newImages) {
       if (images.contains(newImage)) {
         updateImages.add(newImage as String); // Imagem já existente
-      } else if (newImage is String) {
-        // Se for uma String, converte para File
-        final File file = File(newImage);
-
-        // Verifica se o arquivo existe no caminho fornecido
-        if (await file.exists()) {
-          try {
-            final String fileName = path.basename(file.path);
-            final UploadTask task = storageRef.child(Uuid().v1()).putFile(file);
-            final TaskSnapshot snapshot = await task;
-            final String url = await snapshot.ref.getDownloadURL();
-            updateImages.add(url); // Adiciona a nova URL
-          } catch (e) {
-            print('Erro ao fazer upload da imagem: $e');
-          }
-        } else {
-          print('Arquivo não encontrado: $newImage');
-        }
       } else if (newImage is File) {
-        // Caso já seja um File
+        // Upload do arquivo
         try {
           final UploadTask task = storageRef.child(Uuid().v1()).putFile(newImage);
           final TaskSnapshot snapshot = await task;
@@ -133,12 +121,17 @@ class Product extends ChangeNotifier {
     // Deletar as imagens que foram removidas
     for (final image in images) {
       if (!newImages.contains(image)) {
-        try {
-          final ref = storage.refFromURL(image);
-          await ref.delete();
-          print('Imagem $image deletada com sucesso.');
-        } catch (e) {
-          print('Falha ao deletar $image: $e');
+        // Verifica se a URL pertence ao Firebase Storage
+        if (_isFirebaseStorageUrl(image)) {
+          try {
+            final ref = storage.refFromURL(image);
+            await ref.delete();
+            print('Imagem $image deletada com sucesso.');
+          } catch (e) {
+            print('Falha ao deletar $image: $e');
+          }
+        } else {
+          print('URL não é do Firebase Storage: $image');
         }
       }
     }
@@ -150,6 +143,11 @@ class Product extends ChangeNotifier {
     loading = false;
   }
 
+  // Verifica se a URL pertence ao Firebase Storage
+  bool _isFirebaseStorageUrl(String url) {
+    return url.startsWith('https://firebasestorage.googleapis.com/');
+  }
+
   Product clone() {
     return Product(
       id: id,
@@ -157,6 +155,7 @@ class Product extends ChangeNotifier {
       description: description,
       images: List.from(images),
       sizes: sizes.map((size) => size.clone()).toList(),
+      deleted: deleted
     );
   }
 
@@ -164,6 +163,7 @@ class Product extends ChangeNotifier {
     this.id = '',
     this.name = '',
     this.description = '',
+    this.deleted = false,
     List<String>? images,
     List<ItemSize>? sizes,
     List<dynamic>? newImages,
@@ -175,6 +175,7 @@ class Product extends ChangeNotifier {
       : id = documentSnapshot.id,
         name = '',
         description = '',
+        deleted = false,
         images = [],
         sizes = [] {
     final data = documentSnapshot.data() as Map<String, dynamic>?;
@@ -182,6 +183,7 @@ class Product extends ChangeNotifier {
     if (data != null) {
       name = data['name'] as String? ?? '';
       description = data['description'] as String? ?? '';
+      deleted = (data['deleted'] ?? false ) as bool;
       images = List<String>.from(data['images'] as List<dynamic>? ?? []);
 
       if (data['sizes'] is List) {

@@ -7,26 +7,28 @@ import 'package:loja_virtual/models/home_manager.dart';
 import 'package:loja_virtual/models/orders_manager.dart';
 import 'package:loja_virtual/models/product.dart';
 import 'package:loja_virtual/models/products_manager.dart';
+import 'package:loja_virtual/models/stores_manager.dart';
 import 'package:loja_virtual/models/user_manager.dart';
 import 'package:loja_virtual/screens/address/address_screen.dart';
 import 'package:loja_virtual/screens/cart/cart_screem.dart';
 import 'package:loja_virtual/screens/checkout/checkout_screen.dart';
+import 'package:loja_virtual/screens/confirmation/confirmation_screen.dart';
 import 'package:loja_virtual/screens/edit_product/edit_product_screem.dart';
 import 'package:loja_virtual/screens/login/login_screen.dart';
+import 'package:loja_virtual/screens/orders/orders_screen.dart';
 import 'package:loja_virtual/screens/product/product_screen.dart';
 import 'package:loja_virtual/screens/select_product/select_product_screen.dart';
 import 'package:loja_virtual/screens/signup/signup_screen.dart';
 import 'package:provider/provider.dart';
+import 'models/admin_orders_manager.dart';
+import 'models/order.dart';
 import 'screens/base/base_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-
-
   runApp(MyApp());
 }
-
 
 class MyApp extends StatelessWidget {
   @override
@@ -45,6 +47,9 @@ class MyApp extends StatelessWidget {
           create: (context) => HomeManager(),
           lazy: false,
         ),
+        ChangeNotifierProvider(
+          create: (_)=> StoresManager(),
+        ),
         ChangeNotifierProxyProvider<UserManager, CartManager>(
           create: (context) => CartManager(),
           lazy: false,
@@ -56,9 +61,11 @@ class MyApp extends StatelessWidget {
           lazy: false,
           update: (_, userManager, ordersManager) {
             if (userManager.user != null) {
-              return (ordersManager ?? OrdersManager())..updateUser(userManager.user!);
+              return (ordersManager ?? OrdersManager())
+                ..updateUser(userManager.user!);
             }
-            return ordersManager ?? OrdersManager(); // Retorna um novo OrdersManager se ordersManager for nulo
+            return ordersManager ??
+                OrdersManager(); // Retorna um novo OrdersManager se ordersManager for nulo
           },
         ),
         ChangeNotifierProxyProvider<UserManager, AdminUsersManager>(
@@ -67,6 +74,13 @@ class MyApp extends StatelessWidget {
           update: (_, userManager, adminUsersManager) =>
               (adminUsersManager ?? AdminUsersManager())
                 ..updateUser(userManager),
+        ),
+        ChangeNotifierProxyProvider<UserManager, AdminOrdersManager>(
+          create: (_) => AdminOrdersManager(),
+          lazy: false,
+          update: (_, userManager, adminOrdersManager) =>
+              (adminOrdersManager ?? AdminOrdersManager())
+                ..updateAdmin(adminEnable: userManager.adminEnabled),
         ),
       ],
       child: MaterialApp(
@@ -83,7 +97,6 @@ class MyApp extends StatelessWidget {
           ),
         ),
         debugShowCheckedModeBanner: false,
-        initialRoute: '/base',
         onGenerateRoute: (settings) {
           switch (settings.name) {
             case '/login':
@@ -120,7 +133,12 @@ class MyApp extends StatelessWidget {
               return MaterialPageRoute(
                 builder: (context) => CheckoutScreen(),
               );
-            case '/base':
+            case '/confirmation':
+              return MaterialPageRoute(
+                builder: (context) =>
+                    ConfirmationScreen(settings.arguments as Orders),
+              );
+            case '/':
             default:
               return MaterialPageRoute(
                   builder: (context) => BaseScreen(), settings: settings);

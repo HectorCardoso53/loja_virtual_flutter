@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:loja_virtual/models/cart_product.dart';
 
 class OrderProductTile extends StatelessWidget {
@@ -8,30 +9,38 @@ class OrderProductTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Verifica se o produto é nulo
-    if (cartProduct.product == null) {
-      return Container(
-        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        padding: const EdgeInsets.all(8),
-        child: Text('Carregando produto...'),
-      );
-    }
+    return ChangeNotifierProvider.value(
+      value: cartProduct,
+      child: Consumer<CartProduct>(
+        builder: (context, cartProduct, child) {
+          // Verifica se o produto ainda está carregando
+          if (cartProduct.isLoading) {
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.all(8),
+              child: Text('Carregando produto...'),
+            );
+          }
 
-    return _buildProductDetails(context);
+          // Verifica se o produto é nulo
+          if (cartProduct.product == null) {
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.all(8),
+              child: Text('Produto indisponível'),
+            );
+          }
+
+          return _buildProductDetails(context, cartProduct);
+        },
+      ),
+    );
   }
 
-  Widget _buildProductDetails(BuildContext context) {
-    if (cartProduct.product == null) {
-      return Container(
-        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        padding: const EdgeInsets.all(8),
-        child: Text('Produto indisponível'),
-      );
-    }
-
+  Widget _buildProductDetails(BuildContext context, CartProduct cartProduct) {
     return GestureDetector(
-      onTap: (){
-        Navigator.of(context).pushNamed('/product', arguments:cartProduct.product);
+      onTap: () {
+        Navigator.of(context).pushNamed('/product', arguments: cartProduct.product);
       },
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -50,14 +59,14 @@ class OrderProductTile extends StatelessWidget {
                 children: [
                   Text(
                     cartProduct.product!.name,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontWeight: FontWeight.w500,
                       fontSize: 17,
                     ),
                   ),
                   Text(
                     'Tamanho: ${cartProduct.size}',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontWeight: FontWeight.w300,
                     ),
                   ),
@@ -74,7 +83,7 @@ class OrderProductTile extends StatelessWidget {
             ),
             Text(
               '${cartProduct.quantity}',
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 20,
               ),
             ),

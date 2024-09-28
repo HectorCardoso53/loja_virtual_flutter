@@ -29,13 +29,12 @@ class ProductScreen extends StatelessWidget {
           actions: [
             Consumer<UserManager>(
               builder: (_, userManager, child) {
-                if (userManager.adminEnabled) {
+                if (userManager.adminEnabled && !product.deleted) {
                   return IconButton(
                     onPressed: () {
                       Navigator.of(context).pushReplacementNamed(
-                        '/edit_product',
-                        arguments: product
-                      );
+                          '/edit_product',
+                          arguments: product);
                     },
                     icon: Icon(Icons.edit),
                   );
@@ -122,26 +121,40 @@ class ProductScreen extends StatelessWidget {
                       fontSize: 16,
                     ),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.only(
-                      top: 16,
-                      bottom: 8,
-                    ),
-                    child: Text(
-                      'Tamanhos',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
+                  if (product.deleted)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16, bottom: 8),
+                      child: Text(
+                        'Este Produto não está mais disponivel',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.redAccent
+                        ),
+                      ),
+                    )
+                  else ...[
+                    const Padding(
+                      padding: EdgeInsets.only(
+                        top: 16,
+                        bottom: 8,
+                      ),
+                      child: Text(
+                        'Tamanhos',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
-                  ),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: product.sizes.map((s) {
-                      return SizeWidget(size: s);
-                    }).toList(),
-                  ),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: product.sizes.map((s) {
+                        return SizeWidget(size: s);
+                      }).toList(),
+                    ),
+                  ],
                   const SizedBox(
                     height: 20,
                   ),

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<resources>
+    <string name="facebook_app_id">1050990109997285</string>
+    <string name="fb_login_protocol_scheme">fb1050990109997285</string>
+    <string name="facebook_client_token">9f5ef5a943ad88c894ec4403bf8fd260</string>
+    <string name="app_name">loja_virtual</string> <!-- Certifique-se de ter esse valor -->
+</resources>

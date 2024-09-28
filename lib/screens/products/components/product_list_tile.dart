@@ -2,18 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:loja_virtual/models/product.dart';
 
 class ProductListTile extends StatelessWidget {
-
- const ProductListTile(this.product);
+  const ProductListTile(this.product);
 
   final Product product;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: (){
-        Navigator.of(context).pushNamed('/product',arguments: product);
+      onTap: () {
+        Navigator.of(context).pushNamed('/product', arguments: product);
       },
       child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(4),
         ),
@@ -59,6 +59,17 @@ class ProductListTile extends StatelessWidget {
                         color: Theme.of(context).primaryColor,
                       ),
                     ),
+                    if (!product.hasStock)
+                      const Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          'Sem estoque',
+                          style: TextStyle(
+                            color: Colors.redAccent,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),

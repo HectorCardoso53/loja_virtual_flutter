@@ -19,13 +19,6 @@ class ImageSourceSheet extends StatelessWidget {
           toolbarTitle: 'Editar Imagem',
           toolbarColor: Theme.of(context).primaryColor,
           toolbarWidgetColor: Colors.white,
-          aspectRatioPresets: [
-            CropAspectRatioPreset.original,
-            CropAspectRatioPreset.square,
-            CropAspectRatioPreset.ratio3x2,
-            CropAspectRatioPreset.ratio4x3,
-            CropAspectRatioPreset.ratio16x9,
-          ],
           lockAspectRatio: false,
         ),
         IOSUiSettings(
@@ -33,10 +26,6 @@ class ImageSourceSheet extends StatelessWidget {
           minimumAspectRatio: 1.0,
           cancelButtonTitle: 'Cancelar',
           doneButtonTitle: 'Concluir',
-          aspectRatioPresets: [
-            CropAspectRatioPreset.original,
-            CropAspectRatioPreset.square,
-          ],
         ),
       ],
     );

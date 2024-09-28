@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:loja_virtual/models/order.dart';
 import 'package:loja_virtual/models/product.dart';
 import 'package:loja_virtual/models/products_manager.dart';
+import 'package:loja_virtual/screens/orders/cancel_order_dialog.dart';
 import 'package:provider/provider.dart';
 
 import 'components/images_form.dart';
@@ -10,6 +12,7 @@ class EditProductScreen extends StatelessWidget {
   EditProductScreen({Product? product})
       : editing = product != null,
         product = product?.clone() ?? Product();
+
 
   final Product product;
   final bool editing;
@@ -27,6 +30,16 @@ class EditProductScreen extends StatelessWidget {
             style: const TextStyle(color: Colors.white),
           ),
           centerTitle: true,
+          actions: [
+            if (editing)
+              IconButton(
+                onPressed: (){
+                  context.read<ProductsManager>().delete(product);
+                  Navigator.of(context).pop();
+                },
+                icon: Icon(Icons.delete),
+              ),
+          ],
         ),
         backgroundColor: Colors.white,
         body: Form(
@@ -107,29 +120,29 @@ class EditProductScreen extends StatelessWidget {
                           onPressed: product.loading
                               ? null
                               : () async {
-                            if (formkey.currentState!.validate()) {
-                              formkey.currentState!.save();
-                              await product.save();
-                              context.read<ProductsManager>()
-                                  .update(product);
-                              Navigator.of(context).pop();
-                            }
-                          },
+                                  if (formkey.currentState!.validate()) {
+                                    formkey.currentState!.save();
+                                    await product.save();
+                                    context
+                                        .read<ProductsManager>()
+                                        .update(product);
+                                    Navigator.of(context).pop();
+                                  }
+                                },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Theme.of(context).primaryColor,
-                            disabledBackgroundColor: Theme.of(context)
-                                .primaryColor
-                                .withAlpha(100),
+                            disabledBackgroundColor:
+                                Theme.of(context).primaryColor.withAlpha(100),
                           ),
                           child: product.loading
                               ? const CircularProgressIndicator(
-                            valueColor:
-                            AlwaysStoppedAnimation(Colors.white),
-                          )
+                                  valueColor:
+                                      AlwaysStoppedAnimation(Colors.white),
+                                )
                               : const Text(
-                            'Salvar',
-                            style: TextStyle(color: Colors.white),
-                          ),
+                                  'Salvar',
+                                  style: TextStyle(color: Colors.white),
+                                ),
                         );
                       },
                     ),

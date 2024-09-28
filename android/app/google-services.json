@@ -12,7 +12,20 @@
           "package_name": "com.hectorcardoso.loja_virtual"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "951545820892-84vlo1rm8o1206btrm33nu6f35onm4tl.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.hectorcardoso.loja_virtual",
+            "certificate_hash": "acfeda1d4fa8d9b59a2b99828e260498d0e5dfb2"
+          }
+        },
+        {
+          "client_id": "951545820892-nvoc9q39tofm6v6vhf0bn2glqggdvei9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyD2fBmRUBuNyePTSZeNQkwpAypIyGg4PX8"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "951545820892-nvoc9q39tofm6v6vhf0bn2glqggdvei9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

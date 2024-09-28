@@ -52,5 +52,13 @@
     <key>NSMicrophoneUsageDescription</key>
     <string>Este aplicativo precisa acessar o microfone para gravar áudio junto com vídeos.</string>
 
+
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+        <string>comgooglemaps</string>
+        <string>baidumap</string>
+        <string>iosamap</string>
+        <string>waze</string>
+    </array>
 </dict>
 </plist>

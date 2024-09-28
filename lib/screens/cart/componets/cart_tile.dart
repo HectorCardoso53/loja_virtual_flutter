@@ -12,98 +12,104 @@ class CartTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider.value(
       value: cartProduct,
-      child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          child: Row(
-            children: [
-              SizedBox(
-                height: 80,
-                width: 80,
-                child: cartProduct.product?.images != null && cartProduct.product!.images.isNotEmpty
-                    ? Image.network(cartProduct.product!.images.first)
-                    : Container(
-                  color: Colors.grey,
-                  child: Icon(Icons.image_not_supported),
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        cartProduct.product?.name ?? 'Nome indisponível',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w500,
-                          fontSize: 17,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Text(
-                          'Tamanho: ${cartProduct.size ?? 'Indisponível'}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w300,
-                          ),
-                        ),
-                      ),
-                      Consumer<CartProduct>(
-                        builder: (context, cartProduct, child) {
-                          if (cartProduct.hasStock) {
-                            return Text(
-                              'R\$ ${cartProduct.unitPrice.toStringAsFixed(2)}',
-                              style: TextStyle(
-                                color: Theme.of(context).primaryColor,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            );
-                          } else {
-                            return Text(
-                              'Sem estoque disponível',
-                              style: TextStyle(
-                                color: Colors.redAccent,
-                                fontSize: 12,
-                              ),
-                            );
-                          }
-                        },
-                      ),
-                    ],
+      child: GestureDetector(
+        onTap: (){
+          Navigator.of(context).pushNamed('/product',
+          arguments: cartProduct.product);
+        },
+        child: Card(
+          margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                SizedBox(
+                  height: 80,
+                  width: 80,
+                  child: cartProduct.product?.images != null && cartProduct.product!.images.isNotEmpty
+                      ? Image.network(cartProduct.product!.images.first)
+                      : Container(
+                    color: Colors.grey,
+                    child: Icon(Icons.image_not_supported),
                   ),
                 ),
-              ),
-              Consumer<CartProduct>(
-                builder: (context, cartProduct, child) {
-                  return Column(
-                    children: [
-                      CustomIconButton(
-                        iconData: Icons.add,
-                        color: Theme.of(context).primaryColor,
-                        onTap: cartProduct.increment,
-                      ),
-                      Text(
-                        '${cartProduct.quantity}',
-                        style: TextStyle(
-                            fontSize: 20,
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          cartProduct.product?.name ?? 'Nome indisponível',
+                          style: TextStyle(
                             fontWeight: FontWeight.w500,
-                            color: Theme.of(context).primaryColor),
-                      ),
-                      CustomIconButton(
-                        iconData: Icons.remove,
-                        color: cartProduct.quantity > 1
-                            ? Theme.of(context).primaryColor
-                            : Colors.redAccent,
-                        onTap: cartProduct.decrement,
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ],
+                            fontSize: 17,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          child: Text(
+                            'Tamanho: ${cartProduct.size ?? 'Indisponível'}',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w300,
+                            ),
+                          ),
+                        ),
+                        Consumer<CartProduct>(
+                          builder: (context, cartProduct, child) {
+                            if (cartProduct.hasStock) {
+                              return Text(
+                                'R\$ ${cartProduct.unitPrice.toStringAsFixed(2)}',
+                                style: TextStyle(
+                                  color: Theme.of(context).primaryColor,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              );
+                            } else {
+                              return Text(
+                                'Sem estoque disponível',
+                                style: TextStyle(
+                                  color: Colors.redAccent,
+                                  fontSize: 12,
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Consumer<CartProduct>(
+                  builder: (context, cartProduct, child) {
+                    return Column(
+                      children: [
+                        CustomIconButton(
+                          iconData: Icons.add,
+                          color: Theme.of(context).primaryColor,
+                          onTap: cartProduct.increment,
+                        ),
+                        Text(
+                          '${cartProduct.quantity}',
+                          style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w500,
+                              color: Theme.of(context).primaryColor),
+                        ),
+                        CustomIconButton(
+                          iconData: Icons.remove,
+                          color: cartProduct.quantity > 1
+                              ? Theme.of(context).primaryColor
+                              : Colors.redAccent,
+                          onTap: cartProduct.decrement,
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),

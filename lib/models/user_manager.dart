@@ -1,6 +1,9 @@
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:loja_virtual/models/firebase_erros.dart';
 import 'package:loja_virtual/models/users.dart';
 
@@ -23,20 +26,84 @@ class UserManager extends ChangeNotifier {
   // Getter para o firebaseUser
   User? get currentUser => firebaseUser;
 
+
+  bool _loadingface = false;
+  bool get loadingFace => _loadingface;
+  set loadingFace(bool value){
+    _loadingface = value;
+    notifyListeners();
+  }
+
+
+
+  Future<void> signInWithGoogle({
+    required Function onSuccess,
+    required Function(String) onFail,
+    required BuildContext context, // Adicione o contexto aqui
+  }) async {
+    try {
+      loadingFace = true;
+      final GoogleSignInAccount? googleUserAccount = await GoogleSignIn().signIn();
+      final GoogleSignInAuthentication? googleAuth = await googleUserAccount?.authentication;
+      final credentialUser = GoogleAuthProvider.credential(
+        accessToken: googleAuth?.accessToken,
+        idToken: googleAuth?.idToken,
+      );
+
+      final UserCredential userCredential = await auth.signInWithCredential(credentialUser);
+      firebaseUser = userCredential.user;
+
+      // Carregar ou salvar o usuário no Firestore
+      await _loadCurrentUser(firebaseUser: firebaseUser);
+
+      // Exibe o SnackBar para informar que o login foi bem-sucedido
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login com Google realizado com sucesso!'))
+      );
+
+      // Redireciona para a tela Home após um curto delay
+      Future.delayed(Duration(seconds: 1), () {
+        Navigator.pushReplacementNamed(context, '/home'); // Navega para a tela Home
+      });
+
+      // Chama a função de sucesso
+      onSuccess();
+      loadingFace= false;
+    } catch (e) {
+      print('Erro ao fazer login com o Google: $e');
+      if (e is FirebaseAuthException) {
+        onFail(getErrorString(e.code)); // Lida com erros de autenticação
+      } else {
+        onFail('Um erro indefinido ocorreu.');
+      }
+    }
+  }
+
   Future<void> signIn({
     required String email,
     required String password,
     required Function(String) onFail,
     required Function onSuccess,
+    required BuildContext context, // Adicione o contexto aqui
   }) async {
-    loading = true;
     try {
+      loading = true;
       final UserCredential result = await auth.signInWithEmailAndPassword(
           email: email, password: password);
 
       await _loadCurrentUser(firebaseUser: result.user);
 
       onSuccess(); // Se a autenticação for bem-sucedida
+
+      // Exibe o SnackBar para informar que o login foi bem-sucedido
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Login realizado com sucesso!'))
+      );
+
+      // Redireciona para a tela Home após um curto delay
+      Future.delayed(Duration(seconds: 1), () {
+        Navigator.pushReplacementNamed(context, '/home'); // Navega para a tela Home
+      });
     } catch (e) {
       if (e is FirebaseAuthException) {
         final errorMessage = getErrorString(e.code);
@@ -44,6 +111,7 @@ class UserManager extends ChangeNotifier {
       } else {
         onFail('Um erro indefinido ocorreu.');
       }
+    } finally {
       loading = false;
     }
   }
@@ -75,12 +143,16 @@ class UserManager extends ChangeNotifier {
       } else {
         onFail('Um erro indefinido ocorreu.');
       }
-      loading = false;
+    } finally {
+      loading = false; // Resetar o carregamento no final
     }
   }
 
-  void signOut(){
-    auth.signOut();
+
+  void signOut() async {
+    await auth.signOut();
+    await GoogleSignIn().signOut();
+    firebaseUser = null;
     user = null;
     notifyListeners();
   }
@@ -94,19 +166,24 @@ class UserManager extends ChangeNotifier {
     firebaseUser = auth.currentUser ?? firebaseUser;
 
     if (firebaseUser != null) {
-      final DocumentSnapshot docUser = await firestore
-          .collection('users')
-          .doc(firebaseUser.uid)
-          .get();
+      final DocumentSnapshot docUser = await firestore.collection('users').doc(firebaseUser.uid).get();
 
-      user = Users.fromDocument(docUser); // Converte o documento em `Users`
-
-      final docAdmin = await firestore.collection('admins').doc(user!.id).get();
-      if(docAdmin.exists){
-        user!.admin = true;
+      if (docUser.exists) {
+        user = Users.fromDocument(docUser);
+      } else {
+        // Se o usuário não existe, cria um novo documento
+        user = Users(
+          id: firebaseUser.uid,
+          email: firebaseUser.email,
+          name: firebaseUser.displayName,
+        );
+        await user!.saveData();
       }
 
-      print(user!.admin);
+      final docAdmin = await firestore.collection('admins').doc(user!.id).get();
+      if (docAdmin.exists) {
+        user!.admin = true;
+      }
 
       notifyListeners();
     }
@@ -114,4 +191,3 @@ class UserManager extends ChangeNotifier {
 
   bool get adminEnabled => user != null && user!.admin;
 }
-

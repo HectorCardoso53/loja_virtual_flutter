@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.hectorcardoso.loja_virtual"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 34
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -42,7 +42,11 @@ flutter {
 }
 
 dependencies {
-    // Dependências do Firebase
-    implementation 'com.google.firebase:firebase-core:21.1.1'  // Verifique a versão mais recente
+    // Firebase
+    implementation 'com.google.firebase:firebase-analytics-ktx:21.2.0' // Verifique a versão mais recente
+    implementation 'com.google.firebase:firebase-auth:21.1.0' // Verifique a versão mais recente
+    implementation 'com.google.firebase:firebase-firestore:24.3.0' // Verifique a versão mais recente
     // Adicione outras dependências do Firebase conforme necessário
+    implementation 'com.facebook.android:facebook-login:latest.release'
+
 }
