@@ -38,6 +38,7 @@ class SignupScreen extends StatelessWidget {
                   shrinkWrap: true,
                   children: [
                     TextFormField(
+                      cursorColor: Theme.of(context).primaryColor,
                       decoration: InputDecoration(
                         enabled: !userManager.loading,
                         labelText: 'NomeCompleto',
@@ -88,6 +89,7 @@ class SignupScreen extends StatelessWidget {
                       height: 16,
                     ),
                     TextFormField(
+                      cursorColor: Theme.of(context).primaryColor,
                       decoration: InputDecoration(
                         enabled: !userManager.loading,
                         labelText: 'E-mail',
@@ -137,6 +139,7 @@ class SignupScreen extends StatelessWidget {
                       height: 16,
                     ),
                     TextFormField(
+                      cursorColor: Theme.of(context).primaryColor,
                       decoration: InputDecoration(
                         enabled: !userManager.loading,
                         labelText: 'Senha',
@@ -187,6 +190,7 @@ class SignupScreen extends StatelessWidget {
                       height: 16,
                     ),
                     TextFormField(
+                      cursorColor: Theme.of(context).primaryColor,
                       decoration: InputDecoration(
                         enabled: !userManager.loading,
                         labelText: 'Repita a Senha',

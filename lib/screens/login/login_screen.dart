@@ -55,6 +55,7 @@ class LoginScreen extends StatelessWidget {
                   shrinkWrap: true,
                   children: [
                     TextFormField(
+                      cursorColor: Theme.of(context).primaryColor,
                       controller: emailcontroller,
                       enabled: !userManager.loading,
                       decoration: const InputDecoration(
@@ -101,6 +102,7 @@ class LoginScreen extends StatelessWidget {
                       height: 16,
                     ),
                     TextFormField(
+                      cursorColor: Theme.of(context).primaryColor,
                       controller: passwordlcontroller,
                       enabled: !userManager.loading,
                       decoration: InputDecoration(

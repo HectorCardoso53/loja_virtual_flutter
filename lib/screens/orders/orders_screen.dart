@@ -16,7 +16,7 @@ class OrdersScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 4, 125, 141),
         title: Text(
-          'Mes Pedidos',
+          'Meus Pedidos',
           style: TextStyle(
             color: Colors.white,
           ),

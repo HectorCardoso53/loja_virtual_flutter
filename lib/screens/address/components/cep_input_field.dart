@@ -36,6 +36,7 @@ class _CepInputFieldState extends State<CepInputField> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           TextFormField(
+            cursorColor: Theme.of(context).primaryColor,
             enabled: !cartManager.loading,
             controller: cepController,
             decoration: InputDecoration(
